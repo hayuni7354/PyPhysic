@@ -22,20 +22,23 @@ class Box:
         self.s[1] += self.v[1]
     def draw(self):
         pygame.draw.rect(screen, (200,200,200), [self.s[0] - 30, self.s[1] - 30, 30, 30], 3)
+    def grounding(self, g):
+        return abs(self.s[1] + 30 - g.y) < 1
+
 
 class Ground:
     def __init__(self, m, y):
         self.m = m
         self.y = y
     def draw(self):
-        pygame.draw.rect(screen, (255, 0, 255), [0,self.y], [100, self.y + 100 * self.m], 2)
+        pygame.draw.line(screen, (255, 0, 255), [0,self.y], [1000, self.y + 1000 * self.m], 2)
 
 
 #이벤트 루프
 running = True #게임 진행 여부에 대한 변수 True : 게임 진행 중
 clock = pygame.time.Clock()
-Boxs = [Box(100,100)]
-Grounds = [Ground(500,0)]
+boxs = [Box(100,100)]
+grounds = [Ground(0, 500)]
 
 while running:
     for event in pygame.event.get(): #이벤트의 발생 여부에 따른 반복문
@@ -44,8 +47,15 @@ while running:
 
     clock.tick(60)
     screen.fill((0, 0, 0))
-    for b in Boxs:
-        b.move()
+    for g in grounds:
+        g.draw()
+    for b in boxs:
+        onGround = False
+        for g in grounds:
+            if(b.grounding(g)):
+                onGround = True
+        if(not onGround):
+            b.move()
         b.draw()
 
     #screen.blit(background, (0, 0)) #배경에 이미지 그려주고 위치 지정
