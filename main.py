@@ -18,9 +18,10 @@ class Box:
         self.s = np.array([float(x),float(y)])
         self.v = np.array([0.0,0.0])
         self.onGround = False
+        self.delay = 0
     def move(self):
         force = np.array([0.0,0.0])
-        force[1] += 0.01
+        force[1] += 0.0001
         m = self.checkGround(grounds)
         if(self.onGround):
             if(m != 0):
@@ -29,25 +30,30 @@ class Box:
                 sint = 0
             cost = (1 + m**2)**(-1/2)
             rotate = np.array([[cost, -sint],[sint, cost]])
-            temp = np.matmul(rotate, force)
-            temp[1] *= -100
+            tempf = np.matmul(rotate, force)
+            tempv = np.matmul(rotate, self.v)
+            tempf[1] = 0
+            tempv[1] *= -0.5
             rotate = np.array([[cost, sint],[-sint, cost]])
-            temp = np.matmul(rotate, temp)
-            force = temp
-            print(force)
+            tempf = np.matmul(rotate, tempf)
+            tempv = np.matmul(rotate, tempv)
+            force = tempf
+            self.v = tempv
         self.v[0] += force[0]
         self.v[1] += force[1]
         self.s[0] += self.v[0]
         self.s[1] += self.v[1]
     def draw(self):
-        pygame.draw.rect(screen, (200,200,200), [self.s[0] - 30, self.s[1] - 30, 30, 30], 3)
+        pygame.draw.rect(screen, (200,200,200), [self.s[0] - 15, self.s[1] - 15, 30, 30], 3)
     def checkGround(self, gs):
         self.onGround = False
         for g in gs:
-            if(abs(self.s[1] + 30 - g.y) < 2 and not b.onGround):
+            if(abs(self.s[1] + 15 - g.y) < 1 and not b.onGround):
                 self.onGround = True
+                
                 return g.m
         return None
+    
 
 
 class Ground:
@@ -55,30 +61,90 @@ class Ground:
         self.m = m
         self.y = y
     def draw(self):
-        pygame.draw.line(screen, (255, 0, 255), [0,self.y], [1000, self.y + 1000 * self.m], 2)
+        pygame.draw.line(screen, (255, 0, 255), [0,self.y], [1000, self.y + 1000 * self.m], 3)
 
+
+
+class Scene1:
+    def __init__(self):
+        global boxs
+        global grounds
+        boxs = [Box(100,84)]
+        grounds = [Ground(0, 500)]
+        pygame.display.flip()
+
+    def update(self):
+        # a가 1이면 Scene2로 전환
+        if self.a == 1:
+            game.scene = Scene2()
+
+class Scene1: #제미니 사용
+    def __init__(self):
+        global boxs
+        global grounds
+        boxs = [Box(100,84)]
+        grounds = [Ground(0, 500)]
+        self.delay = 0
+        self.obcount = 0
+        pygame.display.flip()
+
+    def observe(self):
+        for b in boxs:
+            if(self.delay > 0):
+               self.delay  -= 1
+            elif(abs(b.v[1]) < 0.001):
+                print(484 - b.s[1])
+                self.obcount += 1
+                self.delay = 1000
+                if(self.obcount >= 5):
+                    global game
+                    game = Scene2()
+
+class Scene2:
+    def __init__(self):
+        global boxs
+        global grounds
+        boxs = [Box(100,84)]
+        grounds = [Ground(1, 200)]
+        self.delay = 1
+        self.obcount = 0
+        pygame.display.flip()
+
+    def observe(self):
+        for b in boxs:
+            if(self.delay > 0):
+               self.delay  -= 1
+            elif(abs(b.v[1]) < 0.001):
+                print(484 - b.s[1])
+                self.obcount += 1
+                self.delay = 1000
+                if(self.obcount >= 5):
+                    global game
+                    game = Scene2()
 
 #이벤트 루프
 running = True #게임 진행 여부에 대한 변수 True : 게임 진행 중
 clock = pygame.time.Clock()
-boxs = [Box(100,100)]
-grounds = [Ground(0, 500)]
+boxs = []
+grounds = []
+game = Scene1()
 
 while running:
     for event in pygame.event.get(): #이벤트의 발생 여부에 따른 반복문
         if event.type == pygame.QUIT: #창을 닫는 이벤트 발생했는가?
             running = False
 
-    clock.tick(600)
+    clock.tick(6000)
     screen.fill((0, 0, 0))
     for g in grounds:
         g.draw()
     for b in boxs:
         b.move()
         b.draw()
+    game.observe()
 
     #screen.blit(background, (0, 0)) #배경에 이미지 그려주고 위치 지정
-    pygame.display.update()
+    pygame.display.flip()
 
 
 
