@@ -44,16 +44,20 @@ class Box:
         self.s[0] += self.v[0]
         self.s[1] += self.v[1]
     def draw(self):
-        pygame.draw.rect(screen, (200,200,200), [self.s[0] - 15, self.s[1] - 15, 30, 30], 3)
+        #pygame.draw.rect(screen, (200,200,200), [self.s[0] - 15, self.s[1] - 15, 30, 30], 3)
+        pygame.draw.circle(screen, (200,200,200), [self.s[0] - 15, self.s[1]], 15, 3)
     def checkGround(self, gs):
         self.onGround = False
         for g in gs:
-            if(abs(self.s[1] + 15 - g.y) < 1 and not b.onGround):
+            if(g.m != 0):
+                sint = (1 + g.m**(-2))**(-1/2)
+            else:
+                sint = 0
+            cost = (1 + g.m**2)**(-1/2)
+            if(abs((self.s[1] + 15/cost) - (g.y - g.m * self.s[0])) < 1 and not b.onGround):
                 self.onGround = True
-                
                 return g.m
-        return None
-    
+                
 
 
 class Ground:
@@ -61,22 +65,9 @@ class Ground:
         self.m = m
         self.y = y
     def draw(self):
-        pygame.draw.line(screen, (255, 0, 255), [0,self.y], [1000, self.y + 1000 * self.m], 3)
+        pygame.draw.line(screen, (255, 0, 255), [0,self.y], [1000, self.y - 1000 * self.m], 3)
 
 
-
-class Scene1:
-    def __init__(self):
-        global boxs
-        global grounds
-        boxs = [Box(100,84)]
-        grounds = [Ground(0, 500)]
-        pygame.display.flip()
-
-    def update(self):
-        # a가 1이면 Scene2로 전환
-        if self.a == 1:
-            game.scene = Scene2()
 
 class Scene1: #제미니 사용
     def __init__(self):
@@ -104,8 +95,8 @@ class Scene2:
     def __init__(self):
         global boxs
         global grounds
-        boxs = [Box(100,84)]
-        grounds = [Ground(1, 200)]
+        boxs = [Box(400,-16)]
+        grounds = [Ground(1/10, 500)]
         self.delay = 1
         self.obcount = 0
         pygame.display.flip()
