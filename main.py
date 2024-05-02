@@ -25,10 +25,11 @@ class Box:
         m = self.checkGround(grounds)
         if(self.onGround):
             if(m != 0):
-                sint = (1 + m**(-2))**(-1/2)
+                sint = m / ((1 + m**2)**1/2)
+                print(sint)
             else:
                 sint = 0
-            cost = (1 + m**2)**(-1/2)
+            cost = 1 / ((1 + m**2)**1/2)
             rotate = np.array([[cost, -sint],[sint, cost]])
             tempf = np.matmul(rotate, force)
             tempv = np.matmul(rotate, self.v)
@@ -50,11 +51,11 @@ class Box:
         self.onGround = False
         for g in gs:
             if(g.m != 0):
-                sint = (1 + g.m**(-2))**(-1/2)
+                sint = g.m / ((1 + g.m**2)**1/2)
             else:
                 sint = 0
-            cost = (1 + g.m**2)**(-1/2)
-            if(abs((self.s[1] + 15/cost) - (g.y - g.m * self.s[0])) < 1 and not b.onGround):
+            cost = 1 / ((1 + g.m**2)**1/2)
+            if(abs((self.s[1] + 15*cost) - (g.y - g.m * self.s[0])) < cost and not b.onGround):
                 self.onGround = True
                 return g.m
                 
@@ -118,7 +119,7 @@ running = True #게임 진행 여부에 대한 변수 True : 게임 진행 중
 clock = pygame.time.Clock()
 boxs = []
 grounds = []
-game = Scene1()
+game = Scene2()
 
 while running:
     for event in pygame.event.get(): #이벤트의 발생 여부에 따른 반복문
