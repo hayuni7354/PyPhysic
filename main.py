@@ -50,8 +50,9 @@ class Box:
         for g in gs:
             sint = g.m / ((1 + g.m**2)**(1/2))
             cost = 1 / ((1 + g.m**2)**(1/2))
-            if(abs((self.s[1] + 16/cost) - (g.y - g.m * self.s[0])) < 2*cost):
+            if(-((self.s[1] + 16/cost) - (g.y - g.m * self.s[0])) < 0):
                 self.onGround = True
+                self.s[1] = g.y - g.m * self.s[0] - 16/cost
                 ms.append(g.m)
         return ms
                 
@@ -84,8 +85,8 @@ class Scene1: #제미니 사용, 수평면
             elif(abs(b.v[1]) < 0.001):
                 print(484 - b.s[1], self.tick)
                 self.obcount += 1
-                self.delay = 1000
-                if(self.obcount >= 5):
+                self.delay = 300
+                if(self.obcount >= 8):
                     global game
                     game = Scene2()
 
@@ -104,11 +105,11 @@ class Scene2: #빗면
         for b in boxs:
             if(self.delay > 0):
                self.delay  -= 1
-            elif(abs(b.v[1]) < 0.001):
-                print(484 - b.s[1], self.tick)
+            elif(abs(b.v[1]) < 0.01):
+                #print(484 - b.s[1], self.tick)
                 self.obcount += 1
-                self.delay = 1000
-                if(self.obcount >= 3):
+                self.delay = 300
+                if(self.obcount >= 10):
                     global game
                     game = Scene3()
 
@@ -130,8 +131,8 @@ class Scene3: #두 빗면
             elif(abs(b.v[1]) < 0.001):
                 #print(484 - b.s[1], self.tick)
                 self.obcount += 1
-                self.delay = 1000
-                if(self.obcount >= 5):
+                self.delay = 100
+                if(self.obcount >= 25):
                     global game
                     game = Scene1()
 
